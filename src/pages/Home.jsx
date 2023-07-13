@@ -3,34 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import EventCard from "../components/EventCard";
 import Navigation from "../components/Navigation";
-import { AutoComplete } from "primereact/autocomplete";
+import { Dropdown } from "primereact/dropdown";
 
 export default function Home() {
   const { meetups } = useAppContext();
 
-  const meetUPoptions = meetups.map((ele, i) => ({ ...ele, name: ele?.title }));
+  const typeOptions = ["Online", "Offline"];
 
-  const [meetup, setMeetups] = useState([]);
-  console.log("meetup: ", meetup);
+  const [type, setType] = useState(null);
 
-  const searchEvents = (event) => {
-    // Timeout to emulate a network connection
-    setTimeout(() => {
-      let _filteredmeetups;
-
-      if (!event.query.trim().length) {
-        _filteredmeetups = [...meetUPoptions];
-      } else {
-        _filteredmeetups = meetUPoptions.filter((country) => {
-          return country.title.toLowerCase().includes(event.query.toLowerCase());
-        });
-      }
-
-      setMeetups(_filteredmeetups);
-    }, 250);
-  };
-
-  const Navigate = useNavigate();
+  const meetupsToShow = meetups?.filter((meetup) => (!type ? true : meetup?.eventType === type));
 
   return (
     <div>
@@ -38,24 +20,18 @@ export default function Home() {
       <main>
         <div className="flex justify-content-between align-items-center ">
           <h1>Meetup Events</h1>
-          <AutoComplete
-            className=""
-            placeholder="Search"
-            field="name"
-            value={meetup}
-            suggestions={meetUPoptions}
-            completeMethod={searchEvents}
-            onChange={(e) => {
-              setMeetups(e.value);
-            }}
-            onSelect={(e) => {
-              Navigate(`/event/${meetup[0]?.id}`);
-              setMeetups(null);
-            }}
+          <Dropdown
+            value={type}
+            onChange={(e) => setType(e.value)}
+            options={typeOptions}
+            // optionLabel="name"
+            editable
+            placeholder="Select a type"
+            className="w-full md:w-14rem"
           />
         </div>
         <div className="flex flex-wrap">
-          {meetups.map((ele, i) => {
+          {meetupsToShow.map((ele, i) => {
             return <EventCard data={ele} />;
           })}
         </div>
